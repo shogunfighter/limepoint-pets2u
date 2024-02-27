@@ -1,7 +1,16 @@
 import yargs from 'yargs';
 import { Pet, calculateRequiredBox } from '.';
 
-async function runCLI() {
+export const parsePetTypeListParam = (petTypeList: string): Pet[] => {
+    const petTypeListArr: Pet[] = petTypeList.split(",").map((item:string) => {
+        if (!Object.keys(Pet).includes(item)) throw new Error("CLI Parameter Error: Unidentified item in `petTypeList`.");
+        return Pet[item as keyof typeof Pet];
+    });
+
+    return petTypeListArr;
+}
+
+export async function runCLI() {
     const args = await yargs
         .option('petTypeList', {
             describe: 'Pet type list',
@@ -10,11 +19,9 @@ async function runCLI() {
         }).argv;
 
     const petTypeList = args.petTypeList as string;
-    const petTypeListArr: Pet[] = petTypeList.split(",").map(item => {
-        if (!Object.keys(Pet).includes(item)) throw new Error("CLI Parameter Error: Unidentified item in `petTypeList`.");
-        return Pet[item];
-    });
-    console.log(calculateRequiredBox(petTypeListArr));
+    const pets: Pet[] = parsePetTypeListParam(petTypeList);
+
+    console.log(calculateRequiredBox(pets));
 }
 
 runCLI();
